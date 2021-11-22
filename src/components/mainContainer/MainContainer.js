@@ -156,7 +156,7 @@ const MainContainer = () => {
                     showFavorite={handleShowFavorite}
                     isFavorite={isFavorite}/>
 
-            <InfiniteScroll next={fetchSubredditCatsList}
+            <InfiniteScroll className='infinity-scroll' next={fetchSubredditCatsList}
                             hasMore={ isFavorite ? (false):(true)}
                             loader={<h2>Loading...</h2>}
                             dataLength={posts.length}
