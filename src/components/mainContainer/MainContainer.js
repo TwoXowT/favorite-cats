@@ -53,8 +53,10 @@ const MainContainer = () => {
     };
 
     useEffect(()=>{
+        if(postType !== 'favorite'){
+            fetchSubredditCatsList(false)
+        }
 
-        fetchSubredditCatsList(false)
     },[postType])
 
     useEffect(()=>{
@@ -74,15 +76,14 @@ const MainContainer = () => {
     })
 
     const addFavorite = (post) =>{
-        console.log('savePost',post)
         let transaction = indexDb.transaction('favorites','readwrite')
         let objectStore = transaction.objectStore('favorites')
         objectStore.add(post)
         transaction.oncomplete = function (e){
-            console.log('Success')
+            console.log('Success save')
         }
         transaction.onerror = function(e){
-            console.log('ERROR', e.target.errorCode)
+            console.log('ERROR save', e.target.errorCode)
         }
     }
 
@@ -95,10 +96,11 @@ const MainContainer = () => {
             req.onsuccess = (event) => {
                 let cursor = event.target.result;
                 if (cursor !== null) {
+                    console.log('cursor!',cursor)
                     if(cursor.value.title === post.title){
-                        let del = store.delete(cursor)
+                        let del = cursor.delete()
                         del.onsuccess = function (){
-                            console.log('delete succsess')
+                            console.log('delete success')
                         }
                     }
                     cursor.continue();
@@ -119,8 +121,8 @@ const MainContainer = () => {
     }
 
     const handleShowFavorite = ()=>{
-        showFavorites()
         setIsFavorite(true)
+        showFavorites()
     }
 
     const showFavorites = () => {
@@ -151,7 +153,8 @@ const MainContainer = () => {
         <div className='mainContainer'>
             <Header activeFilter={postType}
                     changeActiveFilter={handleChangePostType}
-                    showFavorite={handleShowFavorite}/>
+                    showFavorite={handleShowFavorite}
+                    isFavorite={isFavorite}/>
 
             <InfiniteScroll next={fetchSubredditCatsList}
                             hasMore={ isFavorite ? (false):(true)}
@@ -182,6 +185,7 @@ const MainContainer = () => {
                                   preview={card.data?.preview}
                                   comments={card.data?.num_comments}
                                   saveToDb={addFavorite}
+                                  delFromDb={delFromDb}
                                   fromDb={false}/>))
 
                 )}

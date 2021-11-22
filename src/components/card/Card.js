@@ -6,9 +6,13 @@ const Card = ({ups,author,title,media,preview,comments,saveToDb,delFromDb,fromDb
     const [isFavorite, setIsFavorite] = useState(fromDb?(true):(false))
 
     const handleChangeFavorite = ()=>{
-        if(setIsFavorite === true){
-            setIsFavorite(false)
-            delFromDb({ups,author,title,media,preview,comments,saveToDb,delFromDb})
+        console.log('ISFAVORITE?',isFavorite)
+        if(isFavorite){
+
+                setIsFavorite(false)
+                delFromDb({ups,author,title,media,preview,comments,saveToDb,delFromDb})
+
+            return
         }
         setIsFavorite(true)
         saveToDb({ups,author,title,media,preview,comments})

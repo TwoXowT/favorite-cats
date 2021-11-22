@@ -2,7 +2,12 @@ import React from 'react'
 import './Header.scss'
 import {AiOutlineFire, GiPodiumWinner, GiSevenPointedStar, MdFavoriteBorder} from "react-icons/all";
 
-const Header = ({activeFilter,changeActiveFilter,showFavorite}) => {
+const Header = ({activeFilter,changeActiveFilter,showFavorite,isFavorite}) => {
+
+    const handleFavorite = ()=>{
+        changeActiveFilter('favorite')
+        showFavorite()
+    }
 
     return(
         <div className='header-wrapper'>
@@ -25,14 +30,14 @@ const Header = ({activeFilter,changeActiveFilter,showFavorite}) => {
                         <GiPodiumWinner className={ activeFilter === 'top' ? ('activeFilter'):('defaultFilter')}/>
                         Top
                     </div>
-
+                    <div className={ activeFilter === 'favorite' ? ('header-filter-active'):('header-filter')}>
+                        <MdFavoriteBorder className={ activeFilter === 'favorite' ? ('activeFilter'):('defaultFilter')}
+                                          onClick={()=>handleFavorite()}/>
+                        Favorite
+                    </div>
                 </div>
 
-                <div className='header-favorite'>
-                    <MdFavoriteBorder className='defaultFilter'
-                    onClick={()=>showFavorite()}/>
-                    Favorite
-                </div>
+
             </div>
 
         </div>
