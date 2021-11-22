@@ -13,7 +13,6 @@ const Header = ({activeFilter,changeActiveFilter,showFavorite,isFavorite}) => {
         <div className='header-wrapper'>
             <div className='header-container'>
                 <div className='header'>
-
                     <div className={ activeFilter === 'hot' ? ('header-filter-active'):('header-filter')}
                          onClick={()=>changeActiveFilter('hot')}>
                         <AiOutlineFire className={ activeFilter === 'hot' ? ('activeFilter'):('defaultFilter')} />
@@ -23,7 +22,6 @@ const Header = ({activeFilter,changeActiveFilter,showFavorite,isFavorite}) => {
                          onClick={()=>changeActiveFilter('new')}>
                         <GiSevenPointedStar className={ activeFilter === 'new' ? ('activeFilter'):('defaultFilter')}/>
                         New
-
                     </div>
                     <div className={ activeFilter === 'top' ? ('header-filter-active'):('header-filter')}
                          onClick={()=>changeActiveFilter('top')}>
@@ -36,10 +34,7 @@ const Header = ({activeFilter,changeActiveFilter,showFavorite,isFavorite}) => {
                         Favorite
                     </div>
                 </div>
-
-
             </div>
-
         </div>
     )
 }

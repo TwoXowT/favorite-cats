@@ -6,13 +6,90 @@ import Header from "../header/Header";
 import InfiniteScroll from "react-infinite-scroll-component";
 const MainContainer = () => {
     const [posts, setPosts] = useState([]);
-    const [favoritePost, setFavoritePost] = useState()
+    const [favoritePost, setFavoritePost] = useState([])
     const [isFavorite,setIsFavorite] = useState(false)
     const [postType, setPostType] = useState('top');
     const [fetchDirection, setFetchDirection] = useState({
         after: null,
     });
     const [indexDb, setIndexDb] = useState('')
+
+    useEffect(()=>{
+
+        let request = window.indexedDB.open("favoritePost", 1);
+        request.onerror = function(e) {
+            console.log('IndexDb error: ', e.target.errorCode)
+        };
+        request.onupgradeneeded = function(e) {
+            const db = e.target.result;
+            db.createObjectStore('favorites',{ autoIncrement: true })
+        };
+        request.onsuccess = function (e){
+            setIndexDb(e.target.result)
+        }
+
+    })
+
+    const addFavorite = (post) =>{
+        let transaction = indexDb.transaction('favorites','readwrite')
+        let objectStore = transaction.objectStore('favorites')
+        objectStore.add(post)
+        transaction.oncomplete = function (e){
+            console.log('Success save')
+        }
+        transaction.onerror = function(e){
+            console.log('ERROR save', e.target.errorCode)
+        }
+    }
+
+    const delFromFavorite = (post) =>{
+        if (indexDb) {
+            let tx = indexDb.transaction(['favorites'], 'readwrite');
+            let store = tx.objectStore('favorites');
+            let req = store.openCursor();
+            req.onsuccess = (event) => {
+                let cursor = event.target.result;
+                if (cursor !== null) {
+                    console.log('cursor!',cursor)
+                    if(cursor.value.title === post.title){
+                        let del = cursor.delete()
+                        del.onsuccess = function (){
+                            console.log('delete success')
+                        }
+                    }
+                    cursor.continue();
+                }
+            };
+            req.onerror = (event) => {
+                alert(`error in cursor request ${event.target.errorCode}`);
+            };
+        }
+
+    }
+
+    const showFavorites = () => {
+        let allPosts = [];
+        if (indexDb) {
+            let tx = indexDb.transaction(['favorites'], 'readonly');
+            let store = tx.objectStore('favorites');
+            let req = store.openCursor();
+            req.onsuccess = (event) => {
+                let cursor = event.target.result;
+                console.log('cursor',cursor)
+                if (cursor != null) {
+                    allPosts.push(cursor.value);
+                    cursor.continue();
+                } else {
+                    setFavoritePost(allPosts)
+                }
+            };
+            req.onerror = (event) => {
+                alert(`error in cursor request ${event.target.errorCode}`);
+            };
+        }
+
+        setFavoritePost(allPosts);
+    };
 
     const getQueryParams = (queryParams) => {
         let queryString
@@ -28,7 +105,7 @@ const MainContainer = () => {
 
     };
 
-    const fetchSubredditCatsList = async (isNext=true) => {
+    const fetchCats = async (isNext=true) => {
         const queryParam = {
             limit: 10,
             raw_json: 1,
@@ -54,64 +131,10 @@ const MainContainer = () => {
 
     useEffect(()=>{
         if(postType !== 'favorite'){
-            fetchSubredditCatsList(false)
+            fetchCats(false)
         }
 
     },[postType])
-
-    useEffect(()=>{
-
-      let request = window.indexedDB.open("favoritePost", 1);
-      request.onerror = function(e) {
-          console.log('IndexDb error: ', e.target.errorCode)
-      };
-      request.onupgradeneeded = function(e) {
-          const db = e.target.result;
-          db.createObjectStore('favorites',{ autoIncrement: true })
-      };
-      request.onsuccess = function (e){
-          setIndexDb(e.target.result)
-      }
-
-    })
-
-    const addFavorite = (post) =>{
-        let transaction = indexDb.transaction('favorites','readwrite')
-        let objectStore = transaction.objectStore('favorites')
-        objectStore.add(post)
-        transaction.oncomplete = function (e){
-            console.log('Success save')
-        }
-        transaction.onerror = function(e){
-            console.log('ERROR save', e.target.errorCode)
-        }
-    }
-
-
-    const delFromDb = (post) =>{
-        if (indexDb) {
-            let tx = indexDb.transaction(['favorites'], 'readwrite');
-            let store = tx.objectStore('favorites');
-            let req = store.openCursor();
-            req.onsuccess = (event) => {
-                let cursor = event.target.result;
-                if (cursor !== null) {
-                    console.log('cursor!',cursor)
-                    if(cursor.value.title === post.title){
-                        let del = cursor.delete()
-                        del.onsuccess = function (){
-                            console.log('delete success')
-                        }
-                    }
-                    cursor.continue();
-                }
-            };
-            req.onerror = (event) => {
-                alert(`error in cursor request ${event.target.errorCode}`);
-            };
-        }
-
-    }
 
     const handleChangePostType = (type)=>{
         if(type !== 'favorite'){
@@ -125,38 +148,13 @@ const MainContainer = () => {
         showFavorites()
     }
 
-    const showFavorites = () => {
-        let allPosts = [];
-        if (indexDb) {
-            let tx = indexDb.transaction(['favorites'], 'readonly');
-            let store = tx.objectStore('favorites');
-            let req = store.openCursor();
-            req.onsuccess = (event) => {
-                let cursor = event.target.result;
-                console.log('cursor',cursor)
-                if (cursor != null) {
-                    allPosts.push(cursor.value);
-                    cursor.continue();
-                } else {
-                    setFavoritePost(allPosts)
-                }
-            };
-            req.onerror = (event) => {
-                alert(`error in cursor request ${event.target.errorCode}`);
-            };
-        }
-
-       setFavoritePost(allPosts);
-    };
-
     return(
         <div className='mainContainer'>
             <Header activeFilter={postType}
                     changeActiveFilter={handleChangePostType}
                     showFavorite={handleShowFavorite}
                     isFavorite={isFavorite}/>
-
-            <InfiniteScroll className='infinity-scroll' next={fetchSubredditCatsList}
+            <InfiniteScroll className='infinity-scroll' next={fetchCats}
                             hasMore={ isFavorite ? (false):(true)}
                             loader={<h2>Loading...</h2>}
                             dataLength={posts.length}
@@ -169,9 +167,9 @@ const MainContainer = () => {
                           title={card.title}
                           media={card?.media}
                           preview={card?.preview}
-                          comments={card?.num_comments}
+                          comments={card?.comments}
                           saveToDb={addFavorite}
-                          delFromDb={delFromDb}
+                          delFromDb={delFromFavorite}
                           fromDb={true}
                     />))
                     :
@@ -185,9 +183,8 @@ const MainContainer = () => {
                                   preview={card.data?.preview}
                                   comments={card.data?.num_comments}
                                   saveToDb={addFavorite}
-                                  delFromDb={delFromDb}
+                                  delFromDb={delFromFavorite}
                                   fromDb={false}/>))
-
                 )}
             </InfiniteScroll>
         </div>

@@ -3,21 +3,18 @@ import './Card.scss'
 import {AiFillHeart, AiOutlineArrowDown, AiOutlineArrowUp, AiOutlineLike, FaRegCommentAlt} from "react-icons/all";
 
 const Card = ({ups,author,title,media,preview,comments,saveToDb,delFromDb,fromDb}) => {
+
     const [isFavorite, setIsFavorite] = useState(fromDb?(true):(false))
 
     const handleChangeFavorite = ()=>{
-        console.log('ISFAVORITE?',isFavorite)
         if(isFavorite){
-
                 setIsFavorite(false)
                 delFromDb({ups,author,title,media,preview,comments,saveToDb,delFromDb})
-
             return
         }
         setIsFavorite(true)
         saveToDb({ups,author,title,media,preview,comments})
     }
-
 
     return(
         <div className='card-wrapper'>
@@ -30,11 +27,9 @@ const Card = ({ups,author,title,media,preview,comments,saveToDb,delFromDb,fromDb
                 <div className='card-author'>
                     <span>Posted by {author}</span>
                 </div>
-
                 <div className='card-description'>
                     {title}
                 </div>
-
                 <div className='card-img'>
                     {media ? (
                         <video
@@ -58,7 +53,6 @@ const Card = ({ups,author,title,media,preview,comments,saveToDb,delFromDb,fromDb
                     </div>
                 </div>
             </div>
-
         </div>
     )
 }
