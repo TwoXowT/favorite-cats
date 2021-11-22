@@ -1,0 +1,13 @@
+.mainContainer{
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  flex-flow:column;
+
+  .infinity-scroll{
+    display: flex;
+    justify-content: center;
+    flex-flow: column wrap;
+    align-items: center;
+  }
+}
